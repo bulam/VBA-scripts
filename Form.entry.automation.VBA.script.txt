@@ -1,0 +1,186 @@
+Sub TestExtract()
+    
+    ' start the for loop
+    Dim i As Integer
+    i = 16
+    For i = 16 To 86
+       
+        Dim sht As Worksheet
+        Dim IE As Object
+        Dim ieDoc As MSHTML.HTMLDocument
+                                   
+        Set sht = ActiveSheet
+        Set IE = New InternetExplorerMedium
+                          
+        With IE
+         
+            'Open IE
+            IE.Visible = True
+            IE.Navigate "https://admin.wayfair.com/misctools/purchase_orders/create_new.php"
+            
+            'Wait until site is loaded
+            Do While IE.readyState <> 4 'READYSTATE_COMPLETE
+                DoEvents
+            Loop
+            
+            'Get the body
+            Set ieDoc = IE.document
+            
+            'Fill the information on the Create a New Purchase Order page
+            ieDoc.getElementById("descr").Value = Cells(i + 1, 10).Value
+            ieDoc.getElementById("rqd_id").selectedIndex = 29
+    
+            ' Set specific location "Copley"
+            Set frm1 = ieDoc.getElementsByName("RqlID")(0)
+            ' With frm1(payment_method)
+            frm1.Value = "17"
+            ' End With
+            
+            ieDoc.getElementById("initiator_not_paid").Checked = True
+        
+            'Click the submit button
+            Set SubmitBtn = ieDoc.getElementById("create_new")
+            SubmitBtn.Click
+            
+                
+            'Wait until the next page is loaded
+            Do While IE.Busy
+                DoEvents
+            Loop
+            Do While IE.readyState <> READYSTATE_COMPLETE
+                DoEvents
+            Loop
+                        
+            'Get the body
+            IE.Visible = True
+            Dim ieDoc1 As MSHTML.HTMLDocument
+            Set ieDoc1 = IE.document
+            
+            'Fill the information on the PO Details page
+                    
+            ' vendor
+            Dim vendor As String
+            vendor = Cells(i + 1, 8).Value
+        
+            If vendor = "Cross Country Computer" Then
+                ieDoc1.getElementById("select_vendor").selectedIndex = 275
+        
+            ElseIf vendor = "Abacus" Then
+                ieDoc1.getElementById("select_vendor").selectedIndex = 394
+        
+            ElseIf vendor = "Datalogix" Then
+                ieDoc1.getElementById("select_vendor").selectedIndex = 296
+        
+            ElseIf vendor = "I-Behavior" Then
+                ieDoc1.getElementById("select_vendor").selectedIndex = 594
+        
+            ElseIf vendor = "Wiland" Then
+                ieDoc1.getElementById("select_vendor").selectedIndex = 1186
+        
+            End If
+                   
+            ' payment method
+            Set frm = ieDoc1.getElementsByName("payment_method")(0)
+            With frm(payment_method)
+                frm.Value = "2"
+            End With
+            
+            ' period expense relates to start
+            Set frm4 = ieDoc1.getElementsByName("date_expense_start_month")(0)
+            With frm4(payment_method)
+                frm4.Value = Cells(i + 1, 6).Value
+            End With
+            
+            Set frm5 = ieDoc1.getElementsByName("date_expense_start_day")(0)
+            With frm5(payment_method)
+                frm5.Value = "1"
+            End With
+            
+            Set frm6 = ieDoc1.getElementsByName("date_expense_start_year")(0)
+            With frm6(payment_method)
+                frm6.Value = "2015"
+            End With
+            
+            ' period expense relates to end
+            Set frm7 = ieDoc1.getElementsByName("date_expense_end_month")(0)
+            With frm7(payment_method)
+                frm7.Value = Cells(i + 1, 6).Value
+            End With
+                    
+            Set frm8 = ieDoc1.getElementsByName("date_expense_end_day")(0)
+            With frm8(payment_method)
+                frm8.Value = "20"
+            End With
+            
+            Set frm10 = ieDoc1.getElementsByName("date_expense_end_year")(0)
+            With frm10(payment_method)
+                frm10.Value = "2015"
+            End With
+                                    
+            ' anticipated date of receipt of invoice
+            Set frm1 = ieDoc1.getElementsByName("date_outstanding_month")(0)
+            With frm1(payment_method)
+                frm1.Value = "5"
+            End With
+        
+            
+            Set frm2 = ieDoc1.getElementsByName("date_outstanding_day")(0)
+            With frm2(payment_method)
+                frm2.Value = "30"
+            End With
+            
+            Set frm3 = ieDoc1.getElementsByName("date_outstanding_year")(0)
+            With frm3(payment_method)
+                frm3.Value = "2015"
+            End With
+            
+            'description
+            ieDoc1.getElementById("descr_0").Value = Cells(i + 1, 10).Value
+                        
+            'location
+            ieDoc1.getElementById("location_0").selectedIndex = 15
+                        
+            'department
+            ieDoc1.getElementById("rqdId_0").selectedIndex = 30
+            
+            ' business line
+            ieDoc1.getElementById("businessLine_0").selectedIndex = 13
+                     
+            ' item cost
+            ieDoc1.getElementById("unitprice_0").Value = Cells(i + 1, 13).Value
+            
+            ' qty
+            ieDoc1.getElementById("qty_0").Value = "1"
+            
+            'estimate check box
+            ieDoc1.getElementById("isEstimate_0").Click
+            
+            'justification
+            Set frm11 = ieDoc1.getElementsByName("justification")(0)
+            frm11.Value = Cells(i + 1, 10).Value
+                   
+        
+            ' get po # and store it in a variable
+            Dim po_number As Integer
+            po_number = ieDoc1.getElementById("rqn_id").Value
+            
+            ' write the po number in J column
+            Sheet6.Cells(i + 1, 11) = po_number
+            
+            ' write today's date in PO opened date column
+            Sheet6.Cells(i + 1, 12) = "5/1/2015"
+            
+            ' press Save Requistion Info button
+            Set SubmitBtn = ieDoc1.getElementById("save_req_info")
+            SubmitBtn.Click
+                        
+        End With
+        
+        ' close ie window
+        IE.Quit
+    
+    ' Repeat for the next row in the loop
+    Next i
+    
+End Sub
+
